@@ -13,7 +13,7 @@ You don't need to rebuild OpenEMS locally. Just pull the pre-compiled image dire
 To run the OpenEMS environment locally and map it to your current working directory:
 
 ```bash
-docker run -it -v $(pwd):/opt/openems_sim ghcr.io/cbeiraod/YOUR-REPO-NAME:latest bash
+docker run -it -v $(pwd):/opt/openems_sim ghcr.io/cbeiraod/openems-docker-env:latest bash
 ```
 
 ### In GitHub Actions (CI)
@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # Automatically pull the environment from GHCR
-      image: ghcr.io/cbeiraod/YOUR-REPO-NAME:latest
+      image: ghcr.io/cbeiraod/openems-docker-env:latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
