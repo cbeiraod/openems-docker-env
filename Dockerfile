@@ -4,12 +4,13 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install all required C++ build dependencies and Python packages
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git \
     libhdf5-dev libvtk9-dev libboost-all-dev \
     libcgal-dev libtinyxml-dev qtbase5-dev libvtk9-qt-dev \
     python3-numpy python3-matplotlib cython3 python3-h5py python3-pip \
     python3-dev python3-setuptools python-is-python3 python3-wheel \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for the system to find OpenEMS C++ binaries and libraries
@@ -40,7 +41,8 @@ RUN git clone --recursive https://github.com/thliebig/openEMS-Project.git && \
     cd ../../openEMS/python && \
     python3 setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib install && \
     cd /tmp && \
-    rm -rf /tmp/openEMS-Project
+    rm -rf /tmp/openEMS-Project && \
+    find /opt/openEMS -type f \( -name "*.so" -o -executable \) -exec strip --strip-unneeded {} + || true
 
 # Set the default working directory for when the container runs
 WORKDIR /opt/openems_sim
