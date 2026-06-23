@@ -12,14 +12,6 @@ RUN apt-get update && apt-get install -y \
     python3-dev python3-setuptools python-is-python3 python3-wheel \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone the official OpenEMS-Project meta-repository
-WORKDIR /tmp
-RUN git clone --recursive https://github.com/thliebig/openEMS-Project.git
-
-# Build and install the OpenEMS C++ core cleanly into /opt/openEMS
-WORKDIR /tmp/openEMS-Project
-RUN ./update_openEMS.sh /opt/openEMS
-
 # Set environment variables for the system to find OpenEMS C++ binaries and libraries
 ENV PATH="/opt/openEMS/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/opt/openEMS/lib"
@@ -37,17 +29,18 @@ ENV OPENEMS_INSTALL_PATH="/opt/openEMS"
 ENV CFLAGS="-I/opt/openEMS/include -I/opt/openEMS/include/CSXCAD -I/opt/openEMS/include/openEMS"
 ENV LDFLAGS="-L/opt/openEMS/lib"
 
-# Explicitly build the Python bindings using the native setup.py script.
-# We pass the include (-I), library (-L), and run-path (-R) flags that OpenEMS expects.
-WORKDIR /tmp/openEMS-Project/CSXCAD/python
-RUN python3 setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib install
-
-WORKDIR /tmp/openEMS-Project/openEMS/python
-RUN python3 setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib install
-
-
-# Cleanup the source code to keep the final Docker image size small
-RUN rm -rf /tmp/openEMS-Project
+# Clone, build C++ core, build Python bindings, and cleanup IN A SINGLE LAYER
+# This prevents intermediate build files from bloating the final Docker image.
+WORKDIR /tmp
+RUN git clone --recursive https://github.com/thliebig/openEMS-Project.git && \
+    cd openEMS-Project && \
+    ./update_openEMS.sh /opt/openEMS && \
+    cd CSXCAD/python && \
+    python3 setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib install && \
+    cd ../../openEMS/python && \
+    python3 setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib install && \
+    cd /tmp && \
+    rm -rf /tmp/openEMS-Project
 
 # Set the default working directory for when the container runs
 WORKDIR /opt/openems_sim
