@@ -8,10 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git \
     libhdf5-dev libvtk9-dev libboost-all-dev \
     libcgal-dev libtinyxml-dev qtbase5-dev libvtk9-qt-dev \
-    python3-numpy python3-matplotlib cython3 python3-h5py python3-pip \
-    python3-dev python3-setuptools python-is-python3 python3-wheel \
+    python3-pip python3-dev python3-setuptools python-is-python3 python3-wheel \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m pip install "numpy>=2.0" matplotlib cython h5py
 
 # Set environment variables for the system to find OpenEMS C++ binaries and libraries
 ENV PATH="/opt/openEMS/bin:${PATH}"

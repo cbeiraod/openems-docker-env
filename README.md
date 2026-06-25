@@ -38,3 +38,29 @@ jobs:
 ```
 
 Once you push this to your new repo, GitHub Actions will automatically handle the rest! You will see a "Packages" section appear on your repository's right-hand sidebar once the build completes.
+
+# Test build Dockerfile locally
+
+```bash
+docker build -t openems-local-test .
+```
+
+or, for more details:
+
+```bash
+docker build --progress=plain -t openems-local-test .
+```
+
+
+## Test the built container
+
+```bash
+docker run -it --rm openems-local-test /bin/bash
+```
+
+Test the environment inside the container:
+
+```bash
+python3 -c "import CSXCAD; import openEMS; print('Success')"
+python3 -c "import numpy; print('NumPy:', numpy.__version__); import matplotlib.pyplot as plt; print('Matplotlib loaded successfully')"
+```
