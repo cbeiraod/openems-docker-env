@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Build argument for Python version
 # Default to 3 to pick up the Ubuntu system default automatically over time
@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Consolidate dependencies, Deadsnakes PPA, venv creation, and Python package installs into a SINGLE layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    software-properties-common && \
+    software-properties-common gnupg ca-certificates && \
     add-apt-repository ppa:deadsnakes/ppa -y && \
     apt-get update && apt-get install -y --no-install-recommends \
     build-essential cmake git \
