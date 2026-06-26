@@ -12,14 +12,16 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # github.repository is usually "username/repo-name"
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3", "3.10", "3.11", "3.12", "3.13"]
 
-    # These permissions are required to push packages to GHCR
     permissions:
       contents: read
       packages: write
@@ -42,12 +44,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v7
         with:
           context: .
           push: true
-          # Tags the image for both GHCR and Docker Hub
+          build-args: |
+            PYTHON_VERSION=${{ matrix.python-version }}
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/openems-env:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.python-version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/openems-env:${{ matrix.python-version }}
+            ${{ matrix.python-version == '3' && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || '' }}
+            ${{ matrix.python-version == '3' && format('{0}/openems-env:latest', secrets.DOCKERHUB_USERNAME) || '' }}
